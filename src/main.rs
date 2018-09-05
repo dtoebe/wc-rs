@@ -13,15 +13,10 @@ fn main() {
 
     let file_path = args[1].clone();
 
-    let file = File::open(&file_path).unwrap_or_else(|e| {
+    let mut file = File::open(&file_path).unwrap_or_else(|e| {
         println!("failed to open file: {}", e);
         process::exit(1);
     });
-
-    // let mut buf = BufReader::new(file);
-    // let byte_buf = buf.by_ref();
-    // let byte_count = byte_buf.bytes().count();
-    // let line_count = byte_buf.lines().count();
 
     let mut bytes: Vec<u8> = Vec::new();
     let n_bytes = match file.read_to_end(&mut bytes) {
@@ -32,8 +27,8 @@ fn main() {
         }
     };
 
-    let n_chars = bytes.iter().map(|b| *b as char).count();
     let n_lines = bytes.iter().filter(|&b| *b == b'\n').count();
+    let n_chars = bytes.iter().map(|b| *b as char).count();
     let f = str::from_utf8(&bytes).unwrap_or_else(|e| {
         println!("failed to conver to string: {}", e);
         process::exit(1);
