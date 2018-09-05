@@ -26,12 +26,12 @@ fn main() {
             Arg::with_name("bytes")
                 .short("c")
                 .long("bytes")
-                .help("print the newline counts"),
+                .help("print the bytes counts"),
         ).arg(
             Arg::with_name("chars")
                 .short("m")
                 .long("chars")
-                .help("print the newline counts"),
+                .help("print the character counts"),
         ).arg(
             Arg::with_name("INPUT")
                 .help("file to count from")
