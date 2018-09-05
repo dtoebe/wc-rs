@@ -13,7 +13,7 @@ fn main() {
 
     let file_path = args[1].clone();
 
-    let mut file = File::open(&file_path).unwrap_or_else(|e| {
+    let file = File::open(&file_path).unwrap_or_else(|e| {
         println!("failed to open file: {}", e);
         process::exit(1);
     });
@@ -33,7 +33,7 @@ fn main() {
     };
 
     let n_chars = bytes.iter().map(|b| *b as char).count();
-    let n_lines = bytes.iter().filter(|b| **b == b'\n').count();
+    let n_lines = bytes.iter().filter(|&b| *b == b'\n').count();
     let f = str::from_utf8(&bytes).unwrap_or_else(|e| {
         println!("failed to conver to string: {}", e);
         process::exit(1);
