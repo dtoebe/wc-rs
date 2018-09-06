@@ -1,7 +1,9 @@
 extern crate clap;
 
+use std::error::Error;
 use std::fs::File;
-use std::io::prelude::*;
+use std::io;
+use std::io::prelude::Read;
 use std::process;
 use std::str;
 
@@ -35,25 +37,22 @@ fn main() {
         ).arg(
             Arg::with_name("INPUT")
                 .help("file to count from")
-                .required(true)
                 .takes_value(true),
         ).get_matches();
 
-    let file_path = m.value_of("INPUT").unwrap();
-
-    let mut file = File::open(&file_path).unwrap_or_else(|e| {
-        println!("failed to open file: {}", e);
-        process::exit(1);
-    });
-
-    let mut bytes: Vec<u8> = Vec::new();
-    let n = match file.read_to_end(&mut bytes) {
-        Ok(n) => n,
-        Err(e) => {
-            println!("failed to read file: {}", e);
-            process::exit(1);
-        }
+    let mut file_path = String::new();
+    let bytes = if m.is_present("INPUT") {
+        file_path.push_str(m.value_of("INPUT").unwrap());
+        file_to_bytes(file_path.clone()).unwrap()
+    } else {
+        input_to_bytes()
     };
+    let n = bytes.len();
+
+    if n <= 0 {
+        eprintln!("no input found please provide an input");
+        process::exit(1);
+    }
 
     let mut output = String::new();
 
@@ -68,7 +67,7 @@ fn main() {
 
     if m.is_present("words") || none {
         let f = str::from_utf8(&bytes).unwrap_or_else(|e| {
-            println!("failed to conver to string: {}", e);
+            eprintln!("failed to convert to string: {}", e);
             process::exit(1);
         });
 
@@ -91,4 +90,28 @@ fn main() {
     }
 
     println!("{} {}", output, file_path);
+}
+
+fn file_to_bytes(file_path: String) -> Result<Vec<u8>, Box<Error>> {
+    let mut file = File::open(&file_path)?;
+    let mut bytes: Vec<u8> = Vec::new();
+    file.read_to_end(&mut bytes)?;
+
+    Ok(bytes)
+}
+
+fn input_to_bytes() -> Vec<u8> {
+    let mut input = String::new();
+    let stdin = io::stdin();
+    let mut stdin = stdin.lock();
+
+    let mut line = String::new();
+    while let Ok(n_bytes) = stdin.read_to_string(&mut input) {
+        if n_bytes == 0 {
+            break;
+        }
+        input.push_str(&line);
+        line.clear();
+    }
+    input.as_bytes().to_vec()
 }
